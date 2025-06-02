@@ -30,7 +30,7 @@ const CompletionDashboard = () => {
           }
         });
 
-        // Extract timeframe data
+        // Extract timeframe data with fallback values
         const timeframeData = [
           { 
             timeframe: '2 YEAR', 
@@ -142,7 +142,6 @@ const CompletionDashboard = () => {
 
   const { timeframeData } = dashboardData;
 
-  // Rest of your existing dashboard code here...
   const incomeData = timeframeData.map(item => ({
     timeframe: item.timeframe,
     'Low Income': item.lowIncome,
@@ -169,7 +168,6 @@ const CompletionDashboard = () => {
     'Non-Pell Recipients': item.noPellGrant
   }));
 
-  // Calculate completion rates and gaps
   const completionGaps = timeframeData.map(item => {
     const total = item.male + item.female;
     return {
@@ -180,14 +178,12 @@ const CompletionDashboard = () => {
     };
   });
 
-  // Key metrics for cards
-  const latestData = timeframeData[timeframeData.length - 1]; // 8-year data
+  const latestData = timeframeData[timeframeData.length - 1];
   const totalCompletions = latestData.overall;
   const genderGap = ((latestData.female - latestData.male) / (latestData.male + latestData.female) * 100).toFixed(1);
   const firstGenRate = (latestData.firstGen / (latestData.firstGen + latestData.notFirstGen) * 100).toFixed(1);
   const pellRate = (latestData.pellGrant / (latestData.pellGrant + latestData.noPellGrant) * 100).toFixed(1);
 
-  // Calculate dynamic pie chart data based on selected timeframe
   const getIncomeBreakdownData = (timeframe) => {
     const selectedData = timeframeData.find(item => item.timeframe === timeframe);
     if (!selectedData) return [];
@@ -255,7 +251,6 @@ const CompletionDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Student Completion & Success Analytics
@@ -269,7 +264,6 @@ const CompletionDashboard = () => {
           </div>
         </div>
 
-        {/* Navigation */}
         <div className="flex space-x-4 mb-8 overflow-x-auto">
           <TabButton id="overview" label="Overview" icon={Target} />
           <TabButton id="demographics" label="Demographics" icon={Users} />
@@ -277,10 +271,8 @@ const CompletionDashboard = () => {
           <TabButton id="gaps" label="Equity Gaps" icon={AlertCircle} />
         </div>
 
-        {/* Overview Tab */}
         {activeView === 'overview' && (
           <div className="space-y-8">
-            {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <MetricCard
                 title="Gender Gap"
@@ -312,7 +304,6 @@ const CompletionDashboard = () => {
               />
             </div>
 
-            {/* Completion Timeline Table */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold mb-4">Completion Timeline Overview</h3>
               <div className="overflow-x-auto">
@@ -368,7 +359,6 @@ const CompletionDashboard = () => {
               </div>
             </div>
 
-            {/* Completion Timeline Chart */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold mb-4">Completion Numbers by Timeframe</h3>
               <ResponsiveContainer width="100%" height={400}>
@@ -390,11 +380,9 @@ const CompletionDashboard = () => {
           </div>
         )}
 
-        {/* Demographics Tab */}
         {activeView === 'demographics' && (
           <div className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Gender Comparison */}
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-lg font-semibold mb-4">Completion by Gender</h3>
                 <ResponsiveContainer width="100%" height={300}>
@@ -406,6 +394,50 @@ const CompletionDashboard = () => {
                     <Bar dataKey="Male" fill="#3B82F6" />
                     <Bar dataKey="Female" fill="#EC4899" />
                   </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Completion Breakdown by Income Level</h3>
+                  <div className="flex items-center space-x-2">
+                    <label htmlFor="timeframe-select" className="text-sm font-medium text-gray-700">
+                      Timeframe:
+                    </label>
+                    <select
+                      id="timeframe-select"
+                      value={selectedTimeframe}
+                      onChange={(e) => setSelectedTimeframe(e.target.value)}
+                      className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      {timeframeData.map(item => (
+                        <option key={item.timeframe} value={item.timeframe}>
+                          {item.timeframe}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={dynamicIncomeData}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                      label={({name, percentage}) => `${name}: ${percentage}%`}
+                    >
+                      {dynamicIncomeData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={['#EF4444', '#F59E0B', '#10B981'][index]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value, name) => [
+                      `${value.toLocaleString()} students (${dynamicIncomeData.find(d => d.name === name)?.percentage}%)`,
+                      name
+                    ]} />
+                  </PieChart>
                 </ResponsiveContainer>
                 <div className="mt-4 grid grid-cols-3 gap-4">
                   {dynamicIncomeData.map((item, index) => (
@@ -422,7 +454,6 @@ const CompletionDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* First Generation Status */}
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-lg font-semibold mb-4">First-Generation Student Success</h3>
                 <ResponsiveContainer width="100%" height={300}>
@@ -437,7 +468,6 @@ const CompletionDashboard = () => {
                 </ResponsiveContainer>
               </div>
 
-              {/* Pell Grant Recipients */}
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-lg font-semibold mb-4">Financial Aid Recipients</h3>
                 <ResponsiveContainer width="100%" height={300}>
@@ -467,10 +497,8 @@ const CompletionDashboard = () => {
           </div>
         )}
 
-        {/* Trends Tab */}
         {activeView === 'trends' && (
           <div className="space-y-8">
-            {/* Multi-line Trend Analysis */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold mb-4">Completion Trends by Demographics</h3>
               <ResponsiveContainer width="100%" height={400}>
@@ -489,7 +517,6 @@ const CompletionDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Completion Rate Growth */}
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-lg font-semibold mb-4">Year-over-Year Growth</h3>
                 <div className="space-y-4">
@@ -513,7 +540,6 @@ const CompletionDashboard = () => {
                 </div>
               </div>
 
-              {/* Overall Completion Trend */}
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h3 className="text-lg font-semibold mb-4">Overall Completion Trend</h3>
                 <ResponsiveContainer width="100%" height={250}>
@@ -536,10 +562,8 @@ const CompletionDashboard = () => {
           </div>
         )}
 
-        {/* Equity Gaps Tab */}
         {activeView === 'gaps' && (
           <div className="space-y-8">
-            {/* Gap Analysis Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500">
                 <div className="flex items-center justify-between mb-4">
@@ -605,7 +629,6 @@ const CompletionDashboard = () => {
               </div>
             </div>
 
-            {/* Recommendations */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h3 className="text-lg font-semibold mb-4">Equity Recommendations</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -666,47 +689,3 @@ const CompletionDashboard = () => {
 };
 
 export default CompletionDashboard;
-              </div>
-
-              {/* Interactive Income Level Comparison */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Completion Breakdown by Income Level</h3>
-                  <div className="flex items-center space-x-2">
-                    <label htmlFor="timeframe-select" className="text-sm font-medium text-gray-700">
-                      Timeframe:
-                    </label>
-                    <select
-                      id="timeframe-select"
-                      value={selectedTimeframe}
-                      onChange={(e) => setSelectedTimeframe(e.target.value)}
-                      className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      {timeframeData.map(item => (
-                        <option key={item.timeframe} value={item.timeframe}>
-                          {item.timeframe}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={dynamicIncomeData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({name, percentage}) => `${name}: ${percentage}%`}
-                    >
-                      {dynamicIncomeData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={['#EF4444', '#F59E0B', '#10B981'][index]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value, name) => [
-                      `${value.toLocaleString()} students (${dynamicIncomeData.find(d => d.name === name)?.percentage}%)`,
-                      name
-                    ]} />
-                  </PieChart>
