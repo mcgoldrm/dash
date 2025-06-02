@@ -407,6 +407,265 @@ const CompletionDashboard = () => {
                     <Bar dataKey="Female" fill="#EC4899" />
                   </BarChart>
                 </ResponsiveContainer>
+                <div className="mt-4 grid grid-cols-3 gap-4">
+                  {dynamicIncomeData.map((item, index) => (
+                    <div key={item.name} className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className={`w-4 h-4 rounded-full mx-auto mb-2`} 
+                           style={{backgroundColor: ['#EF4444', '#F59E0B', '#10B981'][index]}}></div>
+                      <div className="text-sm font-medium">{item.name}</div>
+                      <div className="text-lg font-bold">{item.value.toLocaleString()}</div>
+                      <div className="text-sm text-gray-600">{item.percentage}%</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* First Generation Status */}
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="text-lg font-semibold mb-4">First-Generation Student Success</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={firstGenData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="timeframe" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="First Generation" fill="#8B5CF6" />
+                    <Bar dataKey="Not First Generation" fill="#06B6D4" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Pell Grant Recipients */}
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="text-lg font-semibold mb-4">Financial Aid Recipients</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={pellGrantData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="timeframe" />
+                    <YAxis />
+                    <Tooltip />
+                    <Area 
+                      type="monotone" 
+                      dataKey="Pell Grant Recipients" 
+                      stackId="1"
+                      stroke="#059669" 
+                      fill="#059669" 
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="Non-Pell Recipients" 
+                      stackId="1"
+                      stroke="#DC2626" 
+                      fill="#DC2626" 
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Trends Tab */}
+        {activeView === 'trends' && (
+          <div className="space-y-8">
+            {/* Multi-line Trend Analysis */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-lg font-semibold mb-4">Completion Trends by Demographics</h3>
+              <ResponsiveContainer width="100%" height={400}>
+                <LineChart data={timeframeData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="timeframe" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="male" stroke="#3B82F6" strokeWidth={2} name="Male" />
+                  <Line type="monotone" dataKey="female" stroke="#EC4899" strokeWidth={2} name="Female" />
+                  <Line type="monotone" dataKey="lowIncome" stroke="#EF4444" strokeWidth={2} name="Low Income" />
+                  <Line type="monotone" dataKey="highIncome" stroke="#10B981" strokeWidth={2} name="High Income" />
+                  <Line type="monotone" dataKey="firstGen" stroke="#8B5CF6" strokeWidth={2} name="First Gen" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Completion Rate Growth */}
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="text-lg font-semibold mb-4">Year-over-Year Growth</h3>
+                <div className="space-y-4">
+                  {timeframeData.slice(1).map((item, index) => {
+                    const prevItem = timeframeData[index];
+                    const growth = prevItem ? ((item.overall - prevItem.overall) / prevItem.overall * 100).toFixed(1) : 0;
+                    return (
+                      <div key={item.timeframe} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <span className="font-medium">{item.timeframe}</span>
+                        <div className="text-right">
+                          <div className="text-lg font-bold">{item.overall.toLocaleString()}</div>
+                          {prevItem && (
+                            <div className={`text-sm ${growth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {growth > 0 ? '+' : ''}{growth}%
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Overall Completion Trend */}
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h3 className="text-lg font-semibold mb-4">Overall Completion Trend</h3>
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={timeframeData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="timeframe" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line 
+                      type="monotone" 
+                      dataKey="overall" 
+                      stroke="#2563eb" 
+                      strokeWidth={3}
+                      dot={{ fill: '#2563eb', strokeWidth: 2 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Equity Gaps Tab */}
+        {activeView === 'gaps' && (
+          <div className="space-y-8">
+            {/* Gap Analysis Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Gender Gap</h3>
+                  <User className="h-6 w-6 text-red-600" />
+                </div>
+                <p className="text-3xl font-bold text-red-600">{Math.abs(genderGap)}%</p>
+                <p className="text-sm text-gray-600 mt-1">Female advantage in completion rates</p>
+                <div className="mt-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Female (8-year):</span>
+                    <span className="font-medium">{latestData.female.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Male (8-year):</span>
+                    <span className="font-medium">{latestData.male.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-500">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Income Gap</h3>
+                  <DollarSign className="h-6 w-6 text-orange-600" />
+                </div>
+                <p className="text-3xl font-bold text-orange-600">
+                  {(((latestData.highIncome / (latestData.lowIncome + latestData.middleIncome + latestData.highIncome)) - 
+                     (latestData.lowIncome / (latestData.lowIncome + latestData.middleIncome + latestData.highIncome))) * 100).toFixed(1)}%
+                </p>
+                <p className="text-sm text-gray-600 mt-1">Completion rate difference by income</p>
+                <div className="mt-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Low Income:</span>
+                    <span className="font-medium">{latestData.lowIncome.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>High Income:</span>
+                    <span className="font-medium">{latestData.highIncome.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">First-Gen Gap</h3>
+                  <GraduationCap className="h-6 w-6 text-purple-600" />
+                </div>
+                <p className="text-3xl font-bold text-purple-600">
+                  {(((latestData.notFirstGen / (latestData.firstGen + latestData.notFirstGen)) - 
+                     (latestData.firstGen / (latestData.firstGen + latestData.notFirstGen))) * 100).toFixed(1)}%
+                </p>
+                <p className="text-sm text-gray-600 mt-1">Non-first-gen advantage</p>
+                <div className="mt-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>First Generation:</span>
+                    <span className="font-medium">{latestData.firstGen.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Not First Gen:</span>
+                    <span className="font-medium">{latestData.notFirstGen.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recommendations */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-lg font-semibold mb-4">Equity Recommendations</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <h4 className="font-semibold text-red-900 flex items-center">
+                      <AlertCircle className="h-4 w-4 mr-2" />
+                      Male Student Support
+                    </h4>
+                    <p className="text-red-700 text-sm mt-1">
+                      Implement targeted mentoring and academic support programs for male students 
+                      to address the {Math.abs(genderGap)}% completion gap.
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                    <h4 className="font-semibold text-orange-900 flex items-center">
+                      <Target className="h-4 w-4 mr-2" />
+                      Low-Income Student Success
+                    </h4>
+                    <p className="text-orange-700 text-sm mt-1">
+                      Expand financial aid, emergency funds, and wraparound services for 
+                      low-income students who represent the largest completion group.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 flex items-center">
+                      <Users className="h-4 w-4 mr-2" />
+                      First-Generation Programs
+                    </h4>
+                    <p className="text-purple-700 text-sm mt-1">
+                      Strengthen first-generation student programs, as they represent 
+                      {firstGenRate}% of completers and need additional support systems.
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 flex items-center">
+                      <Clock className="h-4 w-4 mr-2" />
+                      Early Intervention
+                    </h4>
+                    <p className="text-blue-700 text-sm mt-1">
+                      Focus on 2-4 year completion support, as major progress occurs 
+                      during these critical timeframes.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default CompletionDashboard;
               </div>
 
               {/* Interactive Income Level Comparison */}
