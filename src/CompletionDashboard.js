@@ -142,13 +142,6 @@ const CompletionDashboard = () => {
 
   const { timeframeData } = dashboardData;
 
-  const incomeData = timeframeData.map(item => ({
-    timeframe: item.timeframe,
-    'Low Income': item.lowIncome,
-    'Middle Income': item.middleIncome,
-    'High Income': item.highIncome
-  }));
-
   const genderData = timeframeData.map(item => ({
     timeframe: item.timeframe,
     'Male': item.male,
@@ -167,16 +160,6 @@ const CompletionDashboard = () => {
     'Pell Grant Recipients': item.pellGrant,
     'Non-Pell Recipients': item.noPellGrant
   }));
-
-  const completionGaps = timeframeData.map(item => {
-    const total = item.male + item.female;
-    return {
-      timeframe: item.timeframe,
-      genderGap: ((item.female - item.male) / total * 100).toFixed(1),
-      incomeGap: ((item.highIncome - item.lowIncome) / (item.lowIncome + item.middleIncome + item.highIncome) * 100).toFixed(1),
-      firstGenGap: ((item.notFirstGen - item.firstGen) / (item.firstGen + item.notFirstGen) * 100).toFixed(1)
-    };
-  });
 
   const latestData = timeframeData[timeframeData.length - 1];
   const totalCompletions = latestData.overall;
@@ -210,8 +193,6 @@ const CompletionDashboard = () => {
   };
 
   const dynamicIncomeData = getIncomeBreakdownData(selectedTimeframe);
-
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
   const MetricCard = ({ title, value, icon: Icon, subtitle, trend, color = 'blue' }) => (
     <div className={`bg-white rounded-lg shadow-md p-6 border-l-4 border-${color}-500`}>
